@@ -65,6 +65,13 @@ def delete_show(id):
 
 # TODO: Implement the rest of the API here!
 
+@app.route("/contacts/<id>", methods=['GET'])
+def get_single_contact(id):
+    if db.getById('contacts', int(id)) is None:
+        return create_response(status=404, message="No contact with this id exists")
+    return create_response({"contacts": db.getById('contacts', int(id))})
+
+
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
 """
