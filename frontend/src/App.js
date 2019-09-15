@@ -36,8 +36,8 @@ class App extends Component {
   }
 
   resetForm = () => { 
-  document.getElementById("addContactForm").reset();
-}
+    document.getElementById("addContactForm").reset();
+  }
 
   render() {
     return (
@@ -54,9 +54,9 @@ class App extends Component {
         <p>Add a New Contact Below:</p>
 
         <form id = "addContactForm" onSubmit={this.addNewContact}>
-          <input name="name" type="text" placeholder="Contact's name: " /> 
-          <input name="nickname" type="text" placeholder="Contact's nickname: " />
-          <input name="hobby" type="text" placeholder="Contact's hobby: " /> <br/>
+          <input name="name" type="text" placeholder="Contact's name" /> 
+          <input name="nickname" type="text" placeholder="Contact's nickname" />
+          <input name="hobby" type="text" placeholder="Contact's hobby" /> <br/>
           <input type="submit" value="Add New Contact!" />
           <input name="clearForm" type="button" value="Clear Form" onClick={this.resetForm}/>
         </form>
