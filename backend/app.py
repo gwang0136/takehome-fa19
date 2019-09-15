@@ -51,12 +51,29 @@ def mirror(name):
     data = {"name": name}
     return create_response(data)
 
+# Edited this function to account for a string query for hobby
+# when searching for a contact by String. If a string query is given
+# in the form of a hobby, the function get_contacts_by_hobby() is called
+# with the given hobby. 
 @app.route("/contacts", methods=['GET'])
 def get_all_contacts():
-    return create_response({"contacts": db.get('contacts')})
 
-@app.route("/shows/<id>", methods=['DELETE'])
-def delete_show(id):
+    hobby = request.args.get('hobby')
+
+    if(hobby != ""):
+        return get_contacts_by_hobby(hobby)
+
+    else:
+        return create_response({"contacts": db.get('contacts')})
+
+# Edited for use to delete contacts instead of shows.
+# Previous @app.route and function header commented out below,
+# replaced with relevant @app.route and function header for 
+# the contact problem.
+#@app.route("/shows/<id>", methods=['DELETE'])
+#def delete_show(id):
+@app.route("/contacts/<id>", methods=['DELETE'])
+def delete_contact(id):
     if db.getById('contacts', int(id)) is None:
         return create_response(status=404, message="No contact with this id exists")
     db.deleteById('contacts', int(id))
@@ -66,11 +83,92 @@ def delete_show(id):
 # TODO: Implement the rest of the API here!
 
 @app.route("/contacts/<id>", methods=['GET'])
-def get_single_contact(id):
-    if db.getById('contacts', int(id)) is None:
-        return create_response(status=404, message="No contact with this id exists")
-    return create_response({"contacts": db.getById('contacts', int(id))})
+def get_single_contact_from_id(id):
 
+    if db.getById('contacts', int(id)) is None:
+        return create_response(status=404, message="The contact with id " + str(id) + " was not found.")
+
+    return create_response({'contact': db.getById('contacts', int(id))})
+
+#@app.route("/contacts", methods=['GET'])
+
+
+def get_contacts_by_hobby(hobby):
+
+    found_by_hobby = []
+    all_contacts = db.get('contacts')
+
+    for contact in all_contacts:
+        if contact['hobby'] == hobby:
+            found_by_hobby.append(contact)
+
+    if(found_by_hobby != []):
+        return create_response({'contacts': found_by_hobby})
+
+    else:
+        return create_response(status=404, message="There were no contacts with hobby " + hobby + " found.")
+
+@app.route("/contacts", methods=['POST'])
+def create_contact_with_info():
+
+    input_info = request.json
+
+    missing = ''
+    num_missing = 0
+
+    check_name = (('name' in input_info) and (input_info['name'] != ''))
+    check_nickname = (('nickname' in input_info) and (input_info['nickname'] != ''))
+    check_hobby = (('hobby' in input_info) and (input_info['hobby'] != ''))
+
+    if(check_name and check_nickname and check_hobby):
+        contact = db.create('contacts', {'name': input_info['name'], 'nickname': input_info['nickname'], 'hobby': input_info['hobby']})
+        return create_response(status=201, data={'contact': contact})
+
+    if(not(check_name)):
+        missing += 'a name'
+        num_missing += 1
+
+    if(not(check_nickname)):
+        if(num_missing == 1):
+            missing += ', '
+
+        missing += 'a nickname'
+        num_missing += 1
+
+    if(not(check_hobby)):
+        if(num_missing > 0):
+            missing += ', '
+
+        missing += 'a hobby'
+
+    return create_response(status=404, message = "You are missing " + missing + ". Please revise your input and try again!")
+
+@app.route("/contacts/<id>", methods=['PUT'])
+def update_contact_with_info(id):
+
+    input_info = request.json
+
+    check_name = (('name' in input_info) and (input_info['name'] != ''))
+    check_hobby = (('hobby' in input_info) and (input_info['hobby'] != ''))
+
+    if db.getById('contacts', int(id)) is None:
+        return create_response(status=404, message="The contact with id " + str(id) + " was not found.")
+
+    if(check_name):
+        db.updateById('contacts', int(id), {'name': input_info['name']})
+
+    if(check_hobby):
+        db.updateById('contacts', int(id), {'hobby': input_info['hobby']})
+
+    return create_response({'contact': db.getById('contacts', int(id))})
+
+
+###################################################
+## Part 6 was included in the initial code base, ##
+## was updated above for use on contacts instead ##
+## of shows.                                     ##
+###################################################
+        
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
