@@ -5,7 +5,7 @@ class App extends Component {
   
   render() {
     return (
-      <div/> 
+    	<p> Contact's Name: {this.props.name}</p>
     )
   }
 }
